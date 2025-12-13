@@ -7,25 +7,39 @@ A simple terminal UI for SQL Server, for those who just want to run some queries
 
 ![Demo](demo-query.gif)
 
-You know that mass of software that is SSMS? You open it up and wait... and wait... just to run a simple SELECT query. Meanwhile it's eating up your RAM like there's no tomorrow.
-
-And if you're on Linux? Your only option has been a VS Code extension. Seriously?
-
-All you want is to connect to a database, browse some tables, and run a query. That's it. You don't need the 47 features you've never touched.
-
-sqlit is a lightweight SQL Server client that shows you what you can do at all times. No memorizing keybindings. No digging through menus. Just connect and query.
 
 ## Features
 
+- Fast and intuitive keyboard only control
+- Context based help (no need to memorize tons of hot-keys)
 - Browse databases, tables, views, and stored procedures
 - Execute SQL queries with syntax highlighting
-- Vim-style modal editing (because you're in a terminal)
+- Vim-style query editing
 - SQL autocomplete for tables, columns, and procedures
 - Multiple authentication methods (Windows, SQL Server, Entra ID)
 - Save and manage connections
+- Responsive terminal UI
 - CLI mode for scripting and AI agents
 - Themes (Tokyo Night, Nord, and more)
 - Auto-detects and installs ODBC drivers
+
+
+## Motivation
+I usually do my work in the terminal, but I found myself either having to boot up massively bloated GUI's like SSMS or Vscode for the simple task of merely browsing my databases and doing some queries toward them. For the vast majority of my use cases, I never used any of the advanced features for inspection and debugging that SSMS and other feature-rich clients provide. 
+
+I had the unfortunate situation where doing queries became a pain-point due to the massive operation it is to open SSMS and it's lack of intuitive keyboard only navigation.
+
+The problem got severely worse when I switched to Linux and had to rely on VS CODE's SQL extension to access my SQL database. Something was not right.
+
+I tried to use some existing TUI's for SQL, but they were not intuitive for me and I missed the immediate ease of use that other TUI's such as Lazygit provides.
+
+sqlit is a lightweight SQL Server TUI that is easy to use and beautiful to look at, just connect and query. It's for you that just wants to run queries toward your database without launching applications that eats your ram and takes time to load up. Sqlit is designed to make it easy and enjoyable to access your data, not painful.
+
+It also comes with a CLI, so you can access your data without any interface at all. This comes in especially handy if you want to use AI to write queries for you.
+
+Example prompt: "Use the sqlit cli to show me the users with the most orders."
+
+
 
 ## Installation
 
