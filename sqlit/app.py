@@ -258,20 +258,16 @@ class SSMSTUI(
         return result
 
     def _hide_footer(self) -> None:
-        """Hide the context footer."""
+        """Clear the footer content when showing dialogs."""
         try:
             footer = self.query_one(ContextFooter)
-            footer.add_class("hidden")
+            footer.set_bindings([], [])
         except Exception:
             pass
 
     def _show_footer(self) -> None:
-        """Show the context footer."""
-        try:
-            footer = self.query_one(ContextFooter)
-            footer.remove_class("hidden")
-        except Exception:
-            pass
+        """Restore the footer content after closing dialogs."""
+        self._update_footer_bindings()
 
     def check_action(self, action: str, parameters: tuple) -> bool | None:
         """Only allow actions when their context is active."""

@@ -37,10 +37,6 @@ class ContextFooter(Horizontal):
         padding: 0 1;
     }
 
-    ContextFooter.hidden {
-        display: none;
-    }
-
     #footer-left {
         width: 1fr;
         height: 1;

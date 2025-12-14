@@ -65,7 +65,7 @@ class QueryHistoryScreen(ModalScreen):
         min-height: 8;
         max-height: 8;
         background: $surface-darken-1;
-        border: solid $primary-darken-2;
+        border: none;
         padding: 1;
         margin-top: 1;
     }
