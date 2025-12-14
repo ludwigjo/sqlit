@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 0.4.2)'
+        required: true
 
 jobs:
   release:
@@ -69,9 +74,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract version from tag
+      - name: Extract version
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Setup SSH for AUR
         run: |
@@ -91,21 +101,22 @@ jobs:
           cd aur-repo
           VERSION=${{ steps.version.outputs.VERSION }}
 
+          # Wait for PyPI to have the package available
+          sleep 30
+
           # Download new tarball and get checksum
-          CHECKSUM=$(curl -sL "https://files.pythonhosted.org/packages/source/s/sqlit-tui/sqlit_tui-${VERSION}.tar.gz" | sha256sum | cut -d' ' -f1)
+          curl -sL "https://files.pythonhosted.org/packages/source/s/sqlit-tui/sqlit_tui-${VERSION}.tar.gz" -o /tmp/pkg.tar.gz
+          CHECKSUM=$(sha256sum /tmp/pkg.tar.gz | cut -d' ' -f1)
 
           # Update version and checksum in PKGBUILD
           sed -i "s/^pkgver=.*/pkgver=${VERSION}/" PKGBUILD
           sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
           sed -i "s/^sha256sums=.*/sha256sums=('${CHECKSUM}')/" PKGBUILD
 
-          # Regenerate .SRCINFO
-          docker run --rm -v "$PWD:/pkg" archlinux:latest bash -c "
-            pacman -Sy --noconfirm pacman-contrib
-            cd /pkg
-            chown -R nobody:nobody .
-            su nobody -s /bin/bash -c 'makepkg --printsrcinfo > .SRCINFO'
-          "
+          # Update .SRCINFO
+          sed -i "s/pkgver = .*/pkgver = ${VERSION}/" .SRCINFO
+          sed -i "s/sqlit_tui-[0-9.]*/sqlit_tui-${VERSION}/g" .SRCINFO
+          sed -i "s/sha256sums = .*/sha256sums = ${CHECKSUM}/" .SRCINFO
 
       - name: Push to AUR
         run: |
