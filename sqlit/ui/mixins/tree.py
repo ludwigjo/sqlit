@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from rich.markup import escape as escape_markup
 from textual.widgets import Tree
 
 if TYPE_CHECKING:
@@ -44,10 +45,11 @@ class TreeMixin:
         self.object_tree.root.expand()
 
         for conn in self.connections:
-            display_info = conn.get_display_info()
+            display_info = escape_markup(conn.get_display_info())
             db_type_label = self._db_type_badge(conn.db_type)
+            escaped_name = escape_markup(conn.name)
             node = self.object_tree.root.add(
-                f"[dim]{conn.name}[/dim] [{db_type_label}] ({display_info})"
+                f"[dim]{escaped_name}[/dim] [{db_type_label}] ({display_info})"
             )
             node.data = ("connection", conn)
             node.allow_expand = True
@@ -63,12 +65,13 @@ class TreeMixin:
         adapter = self.current_adapter
 
         def get_conn_label(config, connected=False):
-            display_info = config.get_display_info()
+            display_info = escape_markup(config.get_display_info())
             db_type_label = self._db_type_badge(config.db_type)
+            escaped_name = escape_markup(config.name)
             if connected:
-                name = f"[green]{config.name}[/green]"
+                name = f"[green]{escaped_name}[/green]"
             else:
-                name = config.name
+                name = escaped_name
             return f"{name} [{db_type_label}] ({display_info})"
 
         active_node = None
@@ -99,7 +102,7 @@ class TreeMixin:
 
                     databases = adapter.get_databases(self.current_connection)
                     for db_name in databases:
-                        db_node = dbs_node.add(db_name)
+                        db_node = dbs_node.add(escape_markup(db_name))
                         db_node.data = ("database", db_name)
                         db_node.allow_expand = True
                         self._add_database_object_nodes(db_node, db_name)
@@ -143,8 +146,9 @@ class TreeMixin:
                     parts.append(f"db:{data[1]}")
                 elif data[0] == "folder":
                     parts.append(f"folder:{data[1]}")
+                elif data[0] == "schema":
+                    parts.append(f"schema:{data[2]}")
                 elif data[0] in ("table", "view") and len(data) >= 4:
-                    # Include schema in path for uniqueness
                     schema_name = data[2]
                     obj_name = data[3]
                     parts.append(f"{data[0]}:{schema_name}.{obj_name}")
@@ -258,14 +262,14 @@ class TreeMixin:
         node_path = self._get_node_path(node)
         self._loading_nodes.discard(node_path)
 
-        # Remove loading placeholder
         for child in list(node.children):
             if child.data == ("loading",):
                 child.remove()
 
-        # Add column nodes
         for col in columns:
-            child = node.add_leaf(f"[dim]{col.name}[/] [italic dim]{col.data_type}[/]")
+            col_name = escape_markup(col.name)
+            col_type = escape_markup(col.data_type)
+            child = node.add_leaf(f"[dim]{col_name}[/] [italic dim]{col_type}[/]")
             child.data = ("column", db_name, schema_name, obj_name, col.name)
 
     def _load_folder_async(self, node, data: tuple) -> None:
@@ -306,7 +310,6 @@ class TreeMixin:
         node_path = self._get_node_path(node)
         self._loading_nodes.discard(node_path)
 
-        # Remove loading placeholder
         for child in list(node.children):
             if child.data == ("loading",):
                 child.remove()
@@ -316,36 +319,70 @@ class TreeMixin:
 
         adapter = self._session.adapter
 
-        # Add nodes based on type
+        if folder_type in ("tables", "views"):
+            self._add_schema_grouped_items(node, db_name, folder_type, items, adapter.default_schema)
+        else:
+            for item in items:
+                if item[0] == "procedure":
+                    child = node.add(escape_markup(item[1]))
+                    child.data = ("procedure", db_name, item[1])
+
+    def _add_schema_grouped_items(
+        self,
+        node,
+        db_name: str | None,
+        folder_type: str,
+        items: list,
+        default_schema: str,
+    ) -> None:
+        """Add tables/views grouped by schema."""
+        from collections import defaultdict
+
+        by_schema: dict[str, list] = defaultdict(list)
         for item in items:
-            if item[0] == "table":
-                schema_name, table_name = item[1], item[2]
-                display_name = adapter.format_table_name(schema_name, table_name)
-                child = node.add(display_name)
-                child.data = ("table", db_name, schema_name, table_name)
+            by_schema[item[1]].append(item)
+
+        def schema_sort_key(schema: str) -> tuple[int, str]:
+            if not schema or schema == default_schema:
+                return (0, schema)
+            return (1, schema.lower())
+
+        sorted_schemas = sorted(by_schema.keys(), key=schema_sort_key)
+        has_multiple_schemas = len(sorted_schemas) > 1
+        schema_nodes: dict[str, any] = {}
+
+        for schema in sorted_schemas:
+            schema_items = by_schema[schema]
+            is_default = not schema or schema == default_schema
+
+            if is_default and not has_multiple_schemas:
+                parent = node
+            else:
+                if schema not in schema_nodes:
+                    display_name = schema if schema else default_schema
+                    escaped_name = escape_markup(display_name)
+                    schema_node = node.add(f"[dim]\\[{escaped_name}][/]")
+                    schema_node.data = ("schema", db_name, schema or default_schema, folder_type)
+                    schema_node.allow_expand = True
+                    schema_nodes[schema] = schema_node
+                parent = schema_nodes[schema]
+
+            for item in schema_items:
+                item_type, schema_name, obj_name = item[0], item[1], item[2]
+                child = parent.add(escape_markup(obj_name))
+                child.data = (item_type, db_name, schema_name, obj_name)
                 child.allow_expand = True
-            elif item[0] == "view":
-                schema_name, view_name = item[1], item[2]
-                display_name = adapter.format_table_name(schema_name, view_name)
-                child = node.add(display_name)
-                child.data = ("view", db_name, schema_name, view_name)
-                child.allow_expand = True
-            elif item[0] == "procedure":
-                proc_name = item[1]
-                child = node.add(proc_name)
-                child.data = ("procedure", db_name, proc_name)
 
     def _on_tree_load_error(self, node, error_message: str) -> None:
         """Handle tree load error on main thread."""
         node_path = self._get_node_path(node)
         self._loading_nodes.discard(node_path)
 
-        # Remove loading placeholder
         for child in list(node.children):
             if child.data == ("loading",):
                 child.remove()
 
-        self.notify(error_message, severity="error")
+        self.notify(escape_markup(error_message), severity="error")
 
     def on_tree_node_selected(self, event: Tree.NodeSelected) -> None:
         """Handle tree node selection (double-click/enter)."""

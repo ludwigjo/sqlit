@@ -103,15 +103,16 @@ class MockDatabaseAdapter(DatabaseAdapter):
     def __init__(
         self,
         name: str = "MockDB",
-        tables: list[str] | None = None,
-        views: list[str] | None = None,
+        tables: list[tuple[str, str]] | None = None,
+        views: list[tuple[str, str]] | None = None,
         columns: dict[str, list[ColumnInfo]] | None = None,
         should_fail_connect: bool = False,
         connect_error: str = "Connection failed",
+        default_schema: str = "",
     ):
         self._name = name
-        self._tables = tables or ["users", "products"]
-        self._views = views or ["user_summary"]
+        self._tables = tables or [("", "users"), ("", "products")]
+        self._views = views or [("", "user_summary")]
         self._columns = columns or {
             "users": [
                 ColumnInfo("id", "INTEGER"),
@@ -128,10 +129,15 @@ class MockDatabaseAdapter(DatabaseAdapter):
         self._connect_error = connect_error
         self._connected = False
         self._executed_queries: list[str] = []
+        self._default_schema = default_schema
 
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def default_schema(self) -> str:
+        return self._default_schema
 
     @property
     def supports_multiple_databases(self) -> bool:
@@ -150,14 +156,14 @@ class MockDatabaseAdapter(DatabaseAdapter):
     def get_databases(self, conn: Any) -> list[str]:
         return []
 
-    def get_tables(self, conn: Any, database: str | None = None) -> list[str]:
+    def get_tables(self, conn: Any, database: str | None = None) -> list[tuple[str, str]]:
         return self._tables
 
-    def get_views(self, conn: Any, database: str | None = None) -> list[str]:
+    def get_views(self, conn: Any, database: str | None = None) -> list[tuple[str, str]]:
         return self._views
 
     def get_columns(
-        self, conn: Any, table: str, database: str | None = None
+        self, conn: Any, table: str, database: str | None = None, schema: str | None = None
     ) -> list[ColumnInfo]:
         return self._columns.get(table, [])
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from rich.markup import escape as escape_markup
 from textual.timer import Timer
 from textual.widgets import DataTable, TextArea
 from textual.worker import Worker
@@ -187,9 +188,8 @@ class QueryMixin:
         self.results_table.clear(columns=True)
         self.results_table.add_columns(*columns)
 
-        # Only display first 1000 rows in the table
         for row in rows[:1000]:
-            str_row = tuple(str(v) if v is not None else "NULL" for v in row)
+            str_row = tuple(escape_markup(str(v)) if v is not None else "NULL" for v in row)
             self.results_table.add_row(*str_row)
 
         time_str = f"{elapsed_ms:.0f}ms" if elapsed_ms >= 1 else f"{elapsed_ms:.2f}ms"
@@ -218,7 +218,7 @@ class QueryMixin:
 
         self.results_table.clear(columns=True)
         self.results_table.add_column("Error")
-        self.results_table.add_row(error_message)
+        self.results_table.add_row(escape_markup(error_message))
         self.notify(f"Query error: {error_message}", severity="error")
 
     def _restore_insert_mode(self) -> None:

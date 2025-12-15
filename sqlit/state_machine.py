@@ -599,7 +599,7 @@ class TreeOnTableState(State):
 
 
 class TreeOnFolderState(State):
-    """Tree focused on a folder or database node."""
+    """Tree focused on a folder, database, or schema node."""
 
     def _setup_actions(self) -> None:
         pass  # Just inherits from parent
@@ -632,7 +632,7 @@ class TreeOnFolderState(State):
         return (
             node is not None
             and node.data is not None
-            and node.data[0] in ("folder", "database")
+            and node.data[0] in ("folder", "database", "schema")
         )
 
 
