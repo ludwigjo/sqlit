@@ -59,6 +59,8 @@ class ConnectionPickerScreen(ModalScreen):
         Binding("enter", "select", "Select"),
         Binding("up", "move_up", "Up", show=False),
         Binding("down", "move_down", "Down", show=False),
+        Binding("k", "move_up", "Up", show=False),
+        Binding("j", "move_down", "Down", show=False),
         Binding("backspace", "backspace", "Backspace", show=False),
     ]
 
@@ -131,7 +133,8 @@ class ConnectionPickerScreen(ModalScreen):
 
     def on_key(self, event: Key) -> None:
         """Handle key presses for fuzzy search."""
-        if event.character and event.character.isprintable():
+        # Don't capture j/k - they're used for vim-style navigation
+        if event.character and event.character.isprintable() and event.character not in ("j", "k"):
             self.search_text += event.character
             self._update_list()
             event.stop()

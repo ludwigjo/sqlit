@@ -445,6 +445,9 @@ class TreeFocusedState(State):
         self.allows("new_connection", key="n", label="New", help="New connection")
         self.allows("refresh_tree", key="f", label="Refresh", help="Refresh tree", help_key="R/f")
         self.allows("collapse_tree", help="Collapse all", help_key="z")
+        # Vim-style navigation
+        self.allows("vim_down", help="Move down", help_key="j")
+        self.allows("vim_up", help="Move up", help_key="k")
 
     def is_active(self, app: SSMSTUI) -> bool:
         return app.object_tree.has_focus
@@ -641,13 +644,11 @@ class QueryNormalModeState(State):
         self.allows("execute_query", key="enter", label="Execute", help="Execute query")
         self.allows("clear_query", key="d", label="Clear", help="Clear query")
         self.allows("new_query", key="n", label="New", help="New query (clear all)")
-        self.allows(
-            "show_history",
-            lambda app: app.current_config is not None,
-            key="h",
-            label="History",
-            help="Query history",
-        )
+        # Vim-style navigation
+        self.allows("vim_down", help="Move down", help_key="j")
+        self.allows("vim_up", help="Move up", help_key="k")
+        self.allows("vim_left", help="Move left", help_key="h")
+        self.allows("vim_right", help="Move right", help_key="l")
 
     def get_display_bindings(
         self, app: SSMSTUI
@@ -659,11 +660,6 @@ class QueryNormalModeState(State):
         seen.add("enter_insert_mode")
         left.append(DisplayBinding(key="enter", label="Execute", action="execute_query"))
         seen.add("execute_query")
-
-        if app.current_config is not None:
-            left.append(DisplayBinding(key="h", label="History", action="show_history"))
-        seen.add("show_history")
-
         left.append(DisplayBinding(key="d", label="Clear", action="clear_query"))
         seen.add("clear_query")
         left.append(DisplayBinding(key="n", label="New", action="new_query"))
@@ -701,6 +697,11 @@ class QueryInsertModeState(State):
             "leader_key",
             "new_connection",
             "show_help",
+            # Forbid vim navigation in INSERT mode - hjkl should type characters
+            "vim_down",
+            "vim_up",
+            "vim_left",
+            "vim_right",
         )
 
     def get_display_bindings(
@@ -734,6 +735,11 @@ class ResultsFocusedState(State):
         self.allows("copy_cell", key="y", label="Copy cell", help="Copy selected cell")
         self.allows("copy_row", key="Y", label="Copy row", help="Copy selected row")
         self.allows("copy_results", key="a", label="Copy all", help="Copy all results")
+        # Vim-style navigation
+        self.allows("vim_down", help="Move down", help_key="j")
+        self.allows("vim_up", help="Move up", help_key="k")
+        self.allows("vim_left", help="Move left", help_key="h")
+        self.allows("vim_right", help="Move right", help_key="l")
 
     def get_display_bindings(
         self, app: SSMSTUI

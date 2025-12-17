@@ -28,6 +28,8 @@ class ThemeScreen(ModalScreen[str | None]):
     BINDINGS = [
         Binding("escape", "cancel", "Cancel"),
         Binding("enter", "select_option", "Select"),
+        Binding("j", "cursor_down", "Down", show=False),
+        Binding("k", "cursor_up", "Up", show=False),
     ]
 
     CSS = """
@@ -84,3 +86,13 @@ class ThemeScreen(ModalScreen[str | None]):
 
     def action_cancel(self) -> None:
         self.dismiss(None)
+
+    def action_cursor_down(self) -> None:
+        """Move cursor down in the theme list."""
+        option_list = self.query_one("#theme-list", OptionList)
+        option_list.action_cursor_down()
+
+    def action_cursor_up(self) -> None:
+        """Move cursor up in the theme list."""
+        option_list = self.query_one("#theme-list", OptionList)
+        option_list.action_cursor_up()

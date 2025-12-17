@@ -92,8 +92,10 @@ class DefaultKeymapProvider(KeymapProvider):
             LeaderCommandDef(
                 "z", "cancel_operation", "Cancel", "Actions", guard="query_executing"
             ),
+            LeaderCommandDef(
+                "h", "show_history", "Query History", "Actions", guard="has_connection"
+            ),
             LeaderCommandDef("t", "change_theme", "Change Theme", "Actions"),
-            LeaderCommandDef("h", "show_help", "Help", "Actions"),
             LeaderCommandDef("q", "quit", "Quit", "Actions"),
         ]
 
@@ -125,7 +127,6 @@ class DefaultKeymapProvider(KeymapProvider):
             ActionKeyDef("f5", "execute_query_insert", "query_insert"),
             ActionKeyDef("d", "clear_query", "query_normal"),
             ActionKeyDef("n", "new_query", "query_normal"),
-            ActionKeyDef("h", "show_history", "query_normal"),
             # Results
             ActionKeyDef("v", "view_cell", "results"),
             ActionKeyDef("y", "copy_cell", "results"),

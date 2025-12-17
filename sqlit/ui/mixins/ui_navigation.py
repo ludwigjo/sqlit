@@ -436,6 +436,9 @@ class UINavigationMixin:
     def action_leader_show_help(self) -> None:
         self._execute_leader_command("show_help")
 
+    def action_leader_show_history(self) -> None:
+        self._execute_leader_command("show_history")
+
     def action_leader_quit(self) -> None:
         self._execute_leader_command("quit")
 
@@ -453,3 +456,59 @@ class UINavigationMixin:
     def on_descendant_blur(self, event) -> None:
         """Handle blur to update section labels."""
         self.call_later(self._update_section_labels)
+
+    def action_vim_down(self) -> None:
+        """Vim-style down navigation (j key)."""
+        from ...widgets import VimMode
+
+        # Don't navigate in INSERT mode - let j be typed
+        if self.vim_mode == VimMode.INSERT:
+            return
+
+        if self.object_tree.has_focus:
+            self.object_tree.action_cursor_down()
+        elif self.query_input.has_focus:
+            self.query_input.action_cursor_down()
+        elif self.results_table.has_focus:
+            self.results_table.action_cursor_down()
+
+    def action_vim_up(self) -> None:
+        """Vim-style up navigation (k key)."""
+        from ...widgets import VimMode
+
+        # Don't navigate in INSERT mode - let k be typed
+        if self.vim_mode == VimMode.INSERT:
+            return
+
+        if self.object_tree.has_focus:
+            self.object_tree.action_cursor_up()
+        elif self.query_input.has_focus:
+            self.query_input.action_cursor_up()
+        elif self.results_table.has_focus:
+            self.results_table.action_cursor_up()
+
+    def action_vim_left(self) -> None:
+        """Vim-style left navigation (h key)."""
+        from ...widgets import VimMode
+
+        # Don't navigate in INSERT mode - let h be typed
+        if self.vim_mode == VimMode.INSERT:
+            return
+
+        if self.query_input.has_focus:
+            self.query_input.action_cursor_left()
+        elif self.results_table.has_focus:
+            self.results_table.action_cursor_left()
+
+    def action_vim_right(self) -> None:
+        """Vim-style right navigation (l key)."""
+        from ...widgets import VimMode
+
+        # Don't navigate in INSERT mode - let l be typed
+        if self.vim_mode == VimMode.INSERT:
+            return
+
+        if self.query_input.has_focus:
+            self.query_input.action_cursor_right()
+        elif self.results_table.has_focus:
+            self.results_table.action_cursor_right()

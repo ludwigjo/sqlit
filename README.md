@@ -100,9 +100,9 @@ sqlit connection delete "MyConnection"
 |-----|--------|
 | `i` | Enter INSERT mode |
 | `Esc` | Back to NORMAL mode |
+| `h` / `j` / `k` / `l` | Vim-style navigation (left/down/up/right) |
 | `e` / `q` / `r` | Focus Explorer / Query / Results |
 | `s` | SELECT TOP 100 from table |
-| `h` | Query history |
 | `d` | Clear query |
 | `n` | New query (clear all) |
 | `v` / `y` / `Y` / `a` | View cell / Copy cell / Copy row / Copy all |
@@ -118,8 +118,8 @@ sqlit connection delete "MyConnection"
 | `<space>z` | Cancel running query |
 | `<space>e` | Toggle Explorer |
 | `<space>f` | Toggle Maximize |
+| `<space>h` | Query history |
 | `<space>t` | Change theme |
-| `<space>h` | Help |
 | `<space>q` | Quit |
 
 Autocomplete triggers automatically in INSERT mode. Use `Tab` to accept.

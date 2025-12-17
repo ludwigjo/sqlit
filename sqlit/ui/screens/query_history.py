@@ -22,6 +22,8 @@ class QueryHistoryScreen(ModalScreen):
         Binding("q", "cancel", "Cancel"),
         Binding("enter", "select", "Select"),
         Binding("d", "delete", "Delete"),
+        Binding("j", "cursor_down", "Down", show=False),
+        Binding("k", "cursor_up", "Up", show=False),
     ]
 
     CSS = """
@@ -170,3 +172,19 @@ class QueryHistoryScreen(ModalScreen):
 
     def action_cancel(self) -> None:
         self.dismiss(None)
+
+    def action_cursor_down(self) -> None:
+        """Move cursor down in the history list."""
+        try:
+            option_list = self.query_one("#history-list", OptionList)
+            option_list.action_cursor_down()
+        except Exception:
+            pass
+
+    def action_cursor_up(self) -> None:
+        """Move cursor up in the history list."""
+        try:
+            option_list = self.query_one("#history-list", OptionList)
+            option_list.action_cursor_up()
+        except Exception:
+            pass

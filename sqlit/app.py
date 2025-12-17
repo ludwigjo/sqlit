@@ -205,13 +205,17 @@ class SSMSTUI(
         Binding("f5", "execute_query_insert", "Execute", show=False),
         Binding("d", "clear_query", "Clear", show=False),
         Binding("n", "new_query", "New", show=False),
-        Binding("h", "show_history", "History", show=False),
         Binding("z", "collapse_tree", "Collapse", show=False),
         Binding("v", "view_cell", "View cell", show=False),
         Binding("y", "copy_cell", "Copy cell", show=False),
         Binding("Y", "copy_row", "Copy row", show=False),
         Binding("a", "copy_results", "Copy results", show=False),
         Binding("ctrl+c", "cancel_operation", "Cancel", show=False),
+        # Vim-style navigation (j/k for down/up, h/l for left/right)
+        Binding("j", "vim_down", "Down", show=False),
+        Binding("k", "vim_up", "Up", show=False),
+        Binding("h", "vim_left", "Left", show=False),
+        Binding("l", "vim_right", "Right", show=False),
     ]
 
     def __init__(self, mock_profile: MockProfile | None = None):
